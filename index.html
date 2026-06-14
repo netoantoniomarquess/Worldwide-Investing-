@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steady Edge — Relatório Diário de Mercado | 16 Jun 2026</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:       #F7F5F2;
+      --white:    #FFFFFF;
+      --dark:     #1F2933;
+      --gray:     #5B6670;
+      --border:   #D9DEE3;
+      --teal:     #1F4E5F;
+      --teal-s:   #6E8FA3;
+      --sage:     #7FA287;
+      --gold:     #C7A96B;
+      --red:      #C0392B;
+      --red-l:    #FADBD8;
+      --green-l:  #D5F5E3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--dark); font-size: 14px; line-height: 1.55; }
+
+    /* HEADER */
+    .header { background: var(--teal); color: #fff; padding: 0; }
+    .header-inner { max-width: 1140px; margin: 0 auto; padding: 28px 24px 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+    .header-logo { font-size: 11px; letter-spacing: 3px; color: var(--gold); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+    .header-title { font-size: 26px; font-weight: 700; line-height: 1.15; }
+    .header-sub { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 4px; }
+    .header-date { text-align: right; }
+    .header-date .date-big { font-size: 22px; font-weight: 700; color: var(--gold); }
+    .header-date .date-small { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+    /* NAV */
+    .nav { background: var(--dark); }
+    .nav-inner { max-width: 1140px; margin: 0 auto; padding: 0 24px; display: flex; gap: 2px; flex-wrap: wrap; }
+    .nav a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12px; padding: 10px 14px; display: block; transition: color .2s, background .2s; border-radius: 0; }
+    .nav a:hover { color: var(--gold); background: rgba(255,255,255,0.05); }
+
+    /* CONTAINER */
+    .container { max-width: 1140px; margin: 0 auto; padding: 24px; }
+
+    /* SECTION */
+    .section { background: var(--white); border-radius: 10px; padding: 22px 24px; margin-bottom: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+    .section-title { font-size: 15px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid var(--gold); padding-left: 12px; margin-bottom: 16px; }
+    .section-sub { font-size: 13px; font-weight: 700; color: var(--teal); margin: 16px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+
+    /* KPI GRID */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .kpi { background: var(--white); border-radius: 8px; padding: 14px 16px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border-top: 3px solid var(--teal); }
+    .kpi.gold { border-top-color: var(--gold); }
+    .kpi.sage { border-top-color: var(--sage); }
+    .kpi.red  { border-top-color: var(--red); }
+    .kpi-val  { font-size: 20px; font-weight: 700; color: var(--teal); line-height: 1.1; }
+    .kpi-val.green { color: var(--sage); }
+    .kpi-val.red   { color: var(--red); }
+    .kpi-val.gold  { color: var(--gold); }
+    .kpi-lbl  { font-size: 10.5px; color: var(--gray); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+    .kpi-chg  { font-size: 11px; font-weight: 600; margin-top: 3px; }
+    .up   { color: var(--sage); }
+    .down { color: var(--red); }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { background: var(--teal); color: #fff; padding: 9px 12px; text-align: left; font-weight: 600; font-size: 12px; }
+    tbody tr:nth-child(even) td { background: var(--bg); }
+    tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .tbl-pos { color: var(--sage); font-weight: 700; }
+    .tbl-neg { color: var(--red); font-weight: 700; }
+    .tbl-neu { color: var(--gray); }
+
+    /* BADGE */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-up   { background: var(--green-l); color: #1e8449; }
+    .badge-down { background: var(--red-l);   color: var(--red); }
+    .badge-warn { background: #FEF9E7; color: #D68910; }
+    .badge-info { background: #EAF4FB; color: var(--teal); }
+
+    /* ALERT BOX */
+    .alert { border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; font-size: 13px; line-height: 1.6; }
+    .alert-red    { background: var(--red-l);   border-left: 4px solid var(--red);  }
+    .alert-warn   { background: #FEF9E7;         border-left: 4px solid #D68910;     }
+    .alert-green  { background: var(--green-l);  border-left: 4px solid var(--sage); }
+    .alert-info   { background: #EAF4FB;          border-left: 4px solid var(--teal-s); }
+    .alert strong { font-weight: 700; }
+
+    /* INVESTOR CARDS */
+    .inv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+    .inv-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .inv-head { background: var(--teal); color: #fff; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
+    .inv-head-name { font-weight: 700; font-size: 13.5px; }
+    .inv-head-style { font-size: 11px; color: rgba(255,255,255,0.7); }
+    .inv-body { padding: 12px 14px; font-size: 12.5px; background: var(--white); }
+    .inv-body p { margin-bottom: 7px; line-height: 1.5; }
+    .inv-body strong { color: var(--teal); }
+    .inv-news { background: var(--bg); border-top: 1px solid var(--border); padding: 10px 14px; font-size: 12px; }
+    .inv-news-label { font-weight: 700; color: var(--gold); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+    .inv-card.sage .inv-head { background: var(--sage); }
+    .inv-card.gold .inv-head { background: var(--gold); color: var(--dark); }
+    .inv-card.dark .inv-head { background: var(--dark); }
+
+    /* BERKSHIRE TABLE */
+    .bksh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:700px){ .bksh-grid { grid-template-columns: 1fr; } }
+    .bksh-box { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .bksh-box-head { padding: 8px 14px; font-weight: 700; font-size: 12px; color: #fff; }
+    .bksh-box-head.green { background: var(--sage); }
+    .bksh-box-head.red   { background: var(--red);  }
+    .bksh-box-head.warn  { background: #D68910; }
+
+    /* CHART */
+    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .chart-box  { background: var(--white); border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .chart-label { font-size: 12px; font-weight: 700; color: var(--teal); margin-bottom: 10px; text-align: center; }
+    canvas { max-height: 170px; }
+
+    /* POSICIONAMENTO */
+    .pos-table td:nth-child(2) { font-weight: 700; }
+    .pos-bull  { color: var(--sage); }
+    .pos-bear  { color: var(--red); }
+    .pos-neu   { color: #D68910; }
+
+    /* FOOTER */
+    .footer { text-align: center; font-size: 11px; color: var(--gray); padding: 30px 24px 40px; max-width: 1140px; margin: 0 auto; line-height: 1.7; }
+    .footer a { color: var(--teal-s); text-decoration: none; }
+
+    /* RESPONSIVE */
+    @media(max-width:700px){
+      .header-inner { flex-direction: column; }
+      .header-date { text-align: left; }
+      .kpi-grid { grid-template-columns: repeat(2,1fr); }
+      .inv-grid { grid-template-columns: 1fr; }
+      .chart-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="header-logo">Steady Edge · Wealth Journey</div>
+      <div class="header-title">Relatório Diário de Mercado Global</div>
+      <div class="header-sub">Análise macro · Radar de investidores · Posicionamento tático</div>
+    </div>
+    <div class="header-date">
+      <div class="date-big">16 Jun 2026</div>
+      <div class="date-small">Segunda-feira · Edição #248</div>
+      <div class="date-small" style="margin-top:4px">netoantoniomarquess@gmail.com</div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-inner">
+    <a href="#mercado">Mercado</a>
+    <a href="#macro">Macro</a>
+    <a href="#risco">Risco Sistêmico</a>
+    <a href="#berkshire">Berkshire</a>
+    <a href="#radar">Radar Investidores</a>
+    <a href="#familyoffice">Family Offices</a>
+    <a href="#instituicoes">Instituições</a>
+    <a href="#ativos">Ativos</a>
+    <a href="#posicionamento">Posicionamento</a>
+    <a href="#graficos">Gráficos</a>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ── SUMÁRIO ─────────────────────────────────────────── -->
+<div class="section">
+  <div class="section-title">Sumário Executivo</div>
+  <div class="alert alert-warn">
+    <strong>Semana começa com 3 eventos-chave:</strong> (1) FOMC — decisão de juros do Fed; (2) BoJ — decisão de política monetária do Japão; (3) Copom — próxima decisão da Selic. Geopolítica do Irã segue como wildcard dominante nos preços de energia e Treasuries.
+  </div>
+  <div class="alert alert-red">
+    <strong>Risco sistêmico elevado:</strong> CAPE S&P 500 em 39,27 · Buffett Indicator em 229,7% (+2 desvios-padrão) · SpaceX estreou a US$2,1 tri. Euforia com IA precisa ser monitorada com disciplina.
+  </div>
+  <div class="alert alert-green">
+    <strong>Destaques positivos:</strong> Berkshire aumentou GOOGL +224% e comprou Delta Air Lines. Druckenmiller long cobre, ouro, Japão, Coreia e Brasil. Goldman eleva target do S&P para 8.000.
+  </div>
+  <div class="alert alert-info">
+    <strong>Brasil:</strong> Selic em 14,5% com corte iniciado. IPCA projetado em 5,11% no Focus. USD/BRL em 5,07 — Real forte mas frágil. Ibovespa oferece valuation relativo atrativo (P/L ~9x vs S&P 24x).
+  </div>
+</div>
+
+<!-- ── PAINEL DE MERCADO ───────────────────────────────── -->
+<div class="section" id="mercado">
+  <div class="section-title">Painel de Mercado — 13/06/2026 (último fechamento)</div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-val">7.403</div><div class="kpi-lbl">S&P 500</div><div class="kpi-chg up">+0,50%</div></div>
+    <div class="kpi"><div class="kpi-val">25.717</div><div class="kpi-lbl">Nasdaq 100</div><div class="kpi-chg up">+0,30%</div></div>
+    <div class="kpi"><div class="kpi-val">51.202</div><div class="kpi-lbl">Dow Jones</div><div class="kpi-chg up">+0,70%</div></div>
+    <div class="kpi sage"><div class="kpi-val green">171.133</div><div class="kpi-lbl">Ibovespa</div><div class="kpi-chg down">-0,20%</div></div>
+    <div class="kpi gold"><div class="kpi-val gold">4,47%</div><div class="kpi-lbl">Treasury 10Y</div><div class="kpi-chg up">-10bps</div></div>
+    <div class="kpi gold"><div class="kpi-val gold">US$ 4.180</div><div class="kpi-lbl">Ouro</div><div class="kpi-chg down">-0,65%</div></div>
+    <div class="kpi red"><div class="kpi-val">US$ 90</div><div class="kpi-lbl">WTI (Petróleo)</div><div class="kpi-chg">Geopolítica</div></div>
+    <div class="kpi"><div class="kpi-val">100,09</div><div class="kpi-lbl">DXY</div><div class="kpi-chg up">+0,35%</div></div>
+    <div class="kpi sage"><div class="kpi-val">5,07</div><div class="kpi-lbl">USD/BRL</div><div class="kpi-chg up">BRL forte</div></div>
+    <div class="kpi"><div class="kpi-val">14,50%</div><div class="kpi-lbl">Selic</div><div class="kpi-chg">Ciclo de corte</div></div>
+  </div>
+
+  <!-- Tabela Brasil -->
+  <div class="section-sub">🇧🇷 Brasil</div>
+  <table>
+    <thead><tr><th>Ativo</th><th>Valor</th><th>Var. Dia</th><th>Tendência</th></tr></thead>
+    <tbody>
+      <tr><td>Ibovespa</td><td>171.133</td><td class="tbl-neg">-0,20%</td><td><span class="badge badge-warn">Correção</span></td></tr>
+      <tr><td>IFIX</td><td>3.382</td><td class="tbl-pos">+0,15%</td><td><span class="badge badge-warn">Lateral</span></td></tr>
+      <tr><td>USD/BRL</td><td>5,07</td><td class="tbl-pos">-0,50%</td><td><span class="badge badge-up">BRL forte</span></td></tr>
+      <tr><td>Selic (vigente)</td><td>14,50% a.a.</td><td>–</td><td><span class="badge badge-warn">Início corte</span></td></tr>
+      <tr><td>IPCA (Focus 2026)</td><td>5,11%</td><td>–</td><td><span class="badge badge-down">Acima da meta</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Tabela EUA -->
+  <div class="section-sub" style="margin-top:20px">🇺🇸 Estados Unidos</div>
+  <table>
+    <thead><tr><th>Ativo</th><th>Valor</th><th>Var. Dia</th><th>Tendência</th></tr></thead>
+    <tbody>
+      <tr><td>S&P 500</td><td>7.403</td><td class="tbl-pos">+0,50%</td><td><span class="badge badge-warn">Alta esticada</span></td></tr>
+      <tr><td>Nasdaq 100</td><td>25.717</td><td class="tbl-pos">+0,30%</td><td><span class="badge badge-warn">Alta esticada</span></td></tr>
+      <tr><td>Dow Jones</td><td>51.202</td><td class="tbl-pos">+0,70%</td><td><span class="badge badge-up">Alta saudável</span></td></tr>
+      <tr><td>Treasury 10Y</td><td>4,47%</td><td class="tbl-pos">-10bps</td><td><span class="badge badge-up">Yields caindo</span></td></tr>
+      <tr><td>DXY</td><td>100,09</td><td class="tbl-neg">+0,35%</td><td><span class="badge badge-warn">Firme</span></td></tr>
+      <tr><td>Ouro (XAU/USD)</td><td>US$ 4.180</td><td class="tbl-neg">-0,65%</td><td><span class="badge badge-warn">Consolidando</span></td></tr>
+      <tr><td>WTI (Petróleo)</td><td>US$ 90/bbl</td><td>–</td><td><span class="badge badge-down">Elevado / Geopolítica</span></td></tr>
+      <tr><td>VIX (estimado)</td><td>~15–17</td><td>–</td><td><span class="badge badge-warn">Complacência</span></td></tr>
+      <tr><td>Fed Funds Rate</td><td>3,50%–3,75%</td><td>–</td><td><span class="badge badge-info">Pausa — FOMC Jun</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Índices Globais -->
+  <div class="section-sub" style="margin-top:20px">🌍 Índices Globais</div>
+  <table>
+    <thead><tr><th>Índice</th><th>Região</th><th>Var. Estimada</th></tr></thead>
+    <tbody>
+      <tr><td>S&P 500 (US500)</td><td>EUA</td><td class="tbl-pos">+0,50%</td></tr>
+      <tr><td>Dow Jones (US30)</td><td>EUA</td><td class="tbl-pos">+0,70%</td></tr>
+      <tr><td>Nasdaq 100 (US100)</td><td>EUA</td><td class="tbl-pos">+0,30%</td></tr>
+      <tr><td>Nikkei 225 (JP225)</td><td>Japão</td><td class="tbl-pos">+0,80%</td></tr>
+      <tr><td>FTSE 100 (GB100)</td><td>Reino Unido</td><td class="tbl-pos">+0,40%</td></tr>
+      <tr><td>DAX (DE40)</td><td>Alemanha</td><td class="tbl-pos">+0,60%</td></tr>
+      <tr><td>CAC 40 (FR40)</td><td>França</td><td class="tbl-pos">+0,50%</td></tr>
+      <tr><td>FTSE MIB (IT40)</td><td>Itália</td><td class="tbl-pos">+0,35%</td></tr>
+      <tr><td>IBEX 35 (ES35)</td><td>Espanha</td><td class="tbl-pos">+0,45%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── MACRO ──────────────────────────────────────────── -->
+<div class="section" id="macro">
+  <div class="section-title">Análise Macro Global</div>
+
+  <div class="section-sub">Fed e Ciclo de Juros dos EUA</div>
+  <p>O Federal Reserve mantém os juros em <strong>3,50%–3,75%</strong> pela 2ª reunião consecutiva. A postura é de <em>wait-and-see</em> cauteloso: CPI de março veio em 3,3% a.a. (core 2,6%) e PCE em ~2,7% — acima da meta de 2%. O mercado precifica apenas <strong>1 corte em 2026</strong>, provavelmente em setembro, condicional ao arrefecimento do petróleo via acordo iraniano. A sessão desta semana do FOMC é crítica: qualquer sinalização hawkish pode reverter o rally de bonds da semana passada. Goldman Sachs projeta o S&P 500 a <strong>8.000</strong> com earnings de US$340/ação (+24% a.a.), enquanto JPMorgan revisou seu target para <strong>7.200</strong> citando risco de oil spike e desaceleração do consumo.</p>
+
+  <div class="section-sub" style="margin-top:14px">Brasil — Selic, IPCA e Real</div>
+  <p>O Copom iniciou o ciclo de afrouxamento cortando a Selic de 15,0% para <strong>14,5%</strong>. O Focus desta semana elevou a projeção do IPCA 2026 para <strong>5,11%</strong> — terceira alta consecutiva — e a Selic encerrando o ano em <strong>13,5%</strong>. Ritmo de corte lento, dependente da trajetória fiscal e do câmbio. O custo de oportunidade da renda fixa segue extraordinário: 14,5% ao ano sem risco de crédito. O USD/BRL em 5,07 reflete melhora do externo, mas <strong>qualquer deterioração</strong> (oil spike, Fed hawkish, China fraca) reverte rapidamente o Real.</p>
+
+  <div class="section-sub" style="margin-top:14px">Geopolítica — EUA x Irã</div>
+  <p>O Paquistão confirmou texto final de negociação de paz EUA–Irã em 12/06. O Estreito de Ormuz, responsável por ~10 mi barris/dia, segue bloqueado parcialmente. Cenário base: acordo parcial → petróleo recua para US$75–80 → inflação americana alivia → janela para corte do Fed em setembro. Risco: ruptura → WTI sobe para US$110+ → inflação dispara → Fed mantém juros → recessão técnica em 2027.</p>
+
+  <div class="section-sub" style="margin-top:14px">China, Japão e Emergentes</div>
+  <p>China cresce 4,4–4,9% em 2026 mas <strong>deflação persiste</strong> e setor imobiliário ainda está em limpeza. Deflação chinesa pressiona commodities básicas (aço, carvão) mas não impede a demanda por cobre e lítio (eletrificação). <strong>Japão:</strong> Nikkei performou bem (+0,80% estimado no dia) com BoJ ponderando nova elevação de juros. Druckenmiller está long Japão e Coreia — posições relevantes. <strong>Emergentes:</strong> BlackRock foi a overweight em EM — IA está gerando upgrades de earnings em mercados emergentes, especialmente Ásia tech e exportadores de commodities.</p>
+</div>
+
+<!-- ── RISCO SISTÊMICO ──────────────────────────────────── -->
+<div class="section" id="risco">
+  <div class="section-title">⚠ Risco Sistêmico — Alertas</div>
+  <div class="alert alert-red"><strong>CAPE Shiller:</strong> 39,27 — mediana histórica é 16,06. Mercado americano operando 2,4x acima da média histórica de valuation ciclicamente ajustado.</div>
+  <div class="alert alert-red"><strong>Buffett Indicator:</strong> 229,7% — +2 desvios-padrão acima da tendência. Sinal de SOBREVALORIZAÇÃO EXTREMA. Buffett acumula caixa acima de US$350bi.</div>
+  <div class="alert alert-warn"><strong>Concentração S&P 500:</strong> Top-10 empresas respondem por ~37% do índice — maior concentração da história, superior à bolha das pontocom em 2000.</div>
+  <div class="alert alert-warn"><strong>SpaceX IPO:</strong> Estreou a US$2,1 tri em 12/06 (+19% no dia). OpenAI e Anthropic preparando IPOs. Euforia com IA e novos mega-IPOs é sinal clássico de topo de ciclo especulativo.</div>
+  <div class="alert alert-warn"><strong>VIX em 15–17:</strong> Complacência excessiva. Puts estão historicamente baratas. Custo de proteção baixo — aproveitar enquanto dura.</div>
+  <div class="alert alert-info"><strong>Oportunidade:</strong> Mercados internacionais (Europa, Japão, EM) e value stocks oferecem prêmio de risco muito mais atrativo que o S&P 500 no atual nível de valuation.</div>
+</div>
+
+<!-- ── BERKSHIRE HATHAWAY ────────────────────────────────── -->
+<div class="section" id="berkshire">
+  <div class="section-title">🔍 Berkshire Hathaway — Revamp do Portfólio (13F Q1/2026)</div>
+  <p style="font-size:12px;color:var(--gray);margin-bottom:14px">Fonte: CNBC / SEC 13F Filing · <a href="https://www.cnbc.com/2026/05/18/berkshire-portfolio-revamp-delta-airlines-macys-unitedhealth.html" target="_blank" style="color:var(--teal-s)">cnbc.com/2026/05/18</a> · Divulgado em 18/05/2026</p>
+
+  <div class="bksh-grid">
+    <!-- ENTRADAS / AUMENTOS -->
+    <div>
+      <div class="bksh-box">
+        <div class="bksh-box-head green">▲ NOVAS POSIÇÕES &amp; AUMENTOS</div>
+        <table>
+          <thead><tr><th>Ação</th><th>Ticker</th><th>Var %</th><th>US$ mi</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Alphabet (Google)</strong></td><td>GOOGL</td><td class="tbl-pos">+224,1%</td><td class="tbl-pos">+$11.499</td></tr>
+            <tr><td><strong>Delta Air Lines</strong></td><td>DAL</td><td class="tbl-pos">NEW</td><td class="tbl-pos">+$2.647</td></tr>
+            <tr><td>New York Times</td><td>NYT</td><td class="tbl-pos">+199,0%</td><td class="tbl-pos">+$844</td></tr>
+            <tr><td>Lennar (Cl. A)</td><td>LEN</td><td class="tbl-pos">+43,2%</td><td class="tbl-pos">+$265</td></tr>
+            <tr><td>Macy's</td><td>M</td><td class="tbl-pos">NEW</td><td class="tbl-pos">+$55</td></tr>
+            <tr><td>Lennar (Cl. B)</td><td>LEN.B</td><td class="tbl-pos">+31,3%</td><td class="tbl-pos">+$5</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SAÍDAS / CORTES -->
+    <div>
+      <div class="bksh-box">
+        <div class="bksh-box-head red">▼ SAÍDAS TOTAIS &amp; CORTES RELEVANTES</div>
+        <table>
+          <thead><tr><th>Ação</th><th>Ticker</th><th>Var %</th><th>US$ mi</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Chevron</strong></td><td>CVX</td><td class="tbl-neg">-35,2%</td><td class="tbl-neg">-$9.472</td></tr>
+            <tr><td><strong>Visa</strong></td><td>V</td><td class="tbl-neg">-100%</td><td class="tbl-neg">-$2.508</td></tr>
+            <tr><td><strong>Mastercard</strong></td><td>MA</td><td class="tbl-neg">-100%</td><td class="tbl-neg">-$1.992</td></tr>
+            <tr><td>Constellation Brands</td><td>STZ</td><td class="tbl-neg">-95,1%</td><td class="tbl-neg">-$1.855</td></tr>
+            <tr><td>UnitedHealth</td><td>UNH</td><td class="tbl-neg">-100%</td><td class="tbl-neg">-$1.364</td></tr>
+            <tr><td>Domino's Pizza</td><td>DPZ</td><td class="tbl-neg">-100%</td><td class="tbl-neg">-$1.202</td></tr>
+            <tr><td>AON</td><td>AON</td><td class="tbl-neg">-100%</td><td class="tbl-neg">-$1.163</td></tr>
+            <tr><td>Amazon.com</td><td>AMZN</td><td class="tbl-neg">-100%</td><td class="tbl-neg">-$474</td></tr>
+            <tr><td>Pool Corp</td><td>POOL</td><td class="tbl-neg">-100%</td><td class="tbl-neg">-$621</td></tr>
+            <tr><td>Charter Comm.</td><td>CHTR</td><td class="tbl-neg">-100%</td><td class="tbl-neg">-$229</td></tr>
+            <tr><td>Bank of America</td><td>BAC</td><td class="tbl-neg">-0,7%</td><td class="tbl-neg">-$179</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px">
+    <div class="section-sub">Leitura Estratégica</div>
+    <div class="alert alert-info"><strong>GOOGL +224% (+US$11,5bi):</strong> Maior movimento do portfólio. Buffett apostou pesado em Alphabet como principal proxy de IA — reforçado pelo anúncio de compra adicional de US$10bi diretamente da empresa em 01/06. Junto com a saída de AMZN, a mensagem é clara: Google, não Amazon, é o vencedor da IA na visão de Buffett.</div>
+    <div class="alert alert-info"><strong>Delta Air Lines (NEW, +US$2,6bi):</strong> Retorno surpreendente ao setor aéreo — Buffett vendeu todas as airlines em 2020 durante a pandemia. A volta sugere convicção de que o acordo EUA–Irã normalizará o petróleo e tornará as companhias aéreas lucrativas em 2026-2027.</div>
+    <div class="alert alert-warn"><strong>Saída de Visa (-US$2,5bi) e Mastercard (-US$2bi):</strong> Liquidação total dos dois maiores nomes de pagamentos. Possível preocupação com regulação de taxas de intercâmbio ou rotação para ativos com valuation mais atrativo.</div>
+    <div class="alert alert-warn"><strong>Corte de 35% em Chevron (-US$9,5bi):</strong> Maior desinvestimento em dólares do trimestre. Sinaliza que Buffett considera WTI a US$90 elevado e/ou antecipa queda do petróleo com o acordo iraniano. Redução, não saída total — mantém exposição residual.</div>
+    <div class="alert alert-warn"><strong>Caixa estratégico acima de US$350bi:</strong> Buffett não está comprando a mercado nível atual. Mantém pólvora seca para eventual selloff. A seletividade IS a mensagem.</div>
+  </div>
+</div>
+
+<!-- ── RADAR INVESTIDORES ───────────────────────────────── -->
+<div class="section" id="radar">
+  <div class="section-title">📡 Radar dos Grandes Investidores — Notícias Reais</div>
+  <p style="font-size:12px;color:var(--gray);margin-bottom:16px">Dados buscados via WebSearch em 14/06/2026. Fontes: SEC EDGAR, CNBC, GuruFocus, HedgeCo, Oaktree Capital, Morgan Stanley, Motley Fool, StockCircle.</p>
+
+  <div class="inv-grid">
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Warren Buffett</span><span class="inv-head-style">Berkshire · Value Investing</span></div>
+      <div class="inv-body">
+        <p><strong>Portfolio Q1/2026 (~US$285bi):</strong> AmEx 14,5% · Apple 21,4% · BofA · Coca-Cola · Chevron (top 5 em 31/03/2026). 29 mudanças no trimestre.</p>
+        <p>Berkshire concordou em comprar <strong>US$10bi em ações diretamente da Alphabet</strong> em 01/06/2026 — transação privada, adicional ao aumento já divulgado no 13F.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>+GOOGL +224% (+$11,5bi) · +DAL NEW (+$2,6bi) · -CVX -35% (-$9,5bi) · -V -100% (-$2,5bi) · -MA -100% (-$2bi) · -AMZN -100% · -UNH -100%. Caixa acima de US$350bi. <strong>Sinal: mercado caro demais para Buffett comprar em massa.</strong> <a href="https://www.cnbc.com/2026/05/18/berkshire-portfolio-revamp-delta-airlines-macys-unitedhealth.html" target="_blank" style="color:var(--teal-s)">→ CNBC</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Ray Dalio</span><span class="inv-head-style">Bridgewater · Macro Global</span></div>
+      <div class="inv-body">
+        <p><strong>AUM Bridgewater:</strong> ~US$100bi. All Weather: ~30% ações, 55% bonds, 15% ouro+commodities.</p>
+        <p>Dalio afirma que o ouro é <strong>"o dinheiro mais seguro"</strong> e recomenda 5–15% do portfólio. Alertou que o mundo está "à beira de uma guerra de capitais" com dinheiro sendo usado como arma geopolítica.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Publicações recentes no LinkedIn sobre o "grande ciclo de dívida" dos EUA — déficit fiscal insustentável, monetização inevitável, ouro como proteção estrutural. Bridgewater reduzindo exposição a bonds americanos de longo prazo. <a href="https://hedgeco.net/news/05/2026/bridgewaters-gold-conviction-why-ray-dalios-15-allocation-thesis-is-back-at-the-center-of-the-macro-trade.html" target="_blank" style="color:var(--teal-s)">→ HedgeCo</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Howard Marks</span><span class="inv-head-style">Oaktree Capital · Ciclos de Crédito</span></div>
+      <div class="inv-body">
+        <p><strong>AUM Oaktree:</strong> ~US$190bi (grupo Brookfield). Foco em crédito high yield, distressed e alternativos.</p>
+        <p>Último memo: <strong>"AI Hurtles Ahead"</strong> (fev/2026) — avalia a IA como diferente de todas as inovações anteriores em poder, velocidade e autonomia, mas alerta que os preços dos ativos de IA podem não refletir adequadamente os riscos.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Reflexões da conferência Oaktree 2026 (mar/2026): evolução dos mercados de crédito, natureza das distorções de preço e importância da liderança. Memo "What's Going On in Private Credit" (abr/2026) sobre a ascensão do direct lending. <a href="https://www.oaktreecapital.com/insights/insight-podcast/market-commentary/reflections-on-oaktree-conference-2026-with-howard-marks" target="_blank" style="color:var(--teal-s)">→ Oaktree</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Stanley Druckenmiller</span><span class="inv-head-style">Duquesne Family Office · Macro Top-Down</span></div>
+      <div class="inv-body">
+        <p><strong>Histórico:</strong> ~30% a.a. por 30 anos sem ano negativo. Ex-Quantum/Soros.</p>
+        <p>Portfólio atual publicado: <strong>LONG</strong> Cobre (IA + oferta apertada 8 anos) · <strong>LONG</strong> Ouro (geopolítica) · <strong>LONG</strong> Japão + Coreia + Brasil · <strong>SHORT</strong> Bonds americanos (hedge, não especulação).</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Entrevista Morgan Stanley (mar/2026): "Tudo que importa é IA e Nvidia." Mas posicionamento atual <strong>já não é mais AI-driven</strong> — migrou para cobre, ouro e mercados asiáticos. Bearish no dólar, bullish na economia dos EUA. Maior risco que teme em 2026: <strong>bolhas movidas por narrativa</strong>. <a href="https://acquirersmultiple.com/2026/03/stanley-druckenmiller-massive-disruption-ahead/" target="_blank" style="color:var(--teal-s)">→ Acquirer's Multiple</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Michael Burry</span><span class="inv-head-style">Scion Asset Management · Crises</span></div>
+      <div class="inv-body">
+        <p><strong>Estilo:</strong> Apostas contrárias concentradas de alta convicção. Famoso pelo short de subprime em 2008 (Big Short).</p>
+        <p>13F Q1/2026 ainda não disponível publicamente no EDGAR — o filing da Scion Asset Management tem delay regulatório de 45 dias após encerramento do trimestre.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Sem comentários públicos recentes identificados. Busca no EDGAR retornou apenas filings históricos (2004–2008) da entidade anterior. Aguardar novo 13F. Monitorar X/Twitter para posicionamentos táticos.</p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Seth Klarman</span><span class="inv-head-style">Baupost Group · Deep Value</span></div>
+      <div class="inv-body">
+        <p><strong>AUM:</strong> ~US$30bi. Filosofia: margem de segurança, preservação de capital, alta tolerância à subperformance de curto prazo.</p>
+        <p>Baupost é extremamente discreto — raramente vaza informações. A postura de manter caixa elevado quando o mercado está caro IS uma mensagem.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Sem movimentação pública recente identificada via WebSearch. Alta concentração em caixa quando não há oportunidade óbvia — coerente com CAPE em 39 e Buffett Indicator em 229%. Próxima carta a cotistas não tem data pública.</p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Leopold Aschenbrenner</span><span class="inv-head-style">Situational Awareness · IA e Disrupção</span></div>
+      <div class="inv-body">
+        <p><strong>Foco:</strong> Ex-OpenAI. Autor de "Situational Awareness" (2024). Tese de AGI até 2027–2030.</p>
+        <p>O IPO da SpaceX (que adquiriu o xAI de Musk em fev/2026) confirmou a tese de Aschenbrenner: <strong>a corrida de IA está acelerando e a infraestrutura é o gargalo real</strong>.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>IPO SpaceX/xAI a US$2,1tri valida a tese de consolidação de IA+espaço. OpenAI e Anthropic preparando IPOs — calendário de 2026 como o maior ano de mega-IPOs de IA da história. Positivo para: Nvidia, TSMC, energia nuclear, cobre, data centers.</p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Li Lu</span><span class="inv-head-style">Himalaya Capital · Emergentes Asiáticos</span></div>
+      <div class="inv-body">
+        <p><strong>Estilo:</strong> Value investing estilo Munger aplicado à China/Ásia. Portfólio extremamente concentrado. Ex-posição histórica: BYD.</p>
+        <p>China 2026: crescimento de 4,4–4,9% mas deflação persistente e crise imobiliária ainda em limpeza. Seletividade é crítica.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Sem comentários públicos recentes — Li Lu raramente fala publicamente. Foco em empresas exportadoras chinesas com vantagem competitiva global (EV, energias renováveis) vs. empresas dependentes do consumo doméstico deprimido pela deflação.</p>
+      </div>
+    </div>
+
+  </div><!-- /inv-grid -->
+</div>
+
+<!-- ── FAMILY OFFICES ──────────────────────────────────── -->
+<div class="section" id="familyoffice">
+  <div class="section-title">🏦 Family Offices &amp; Gestores Institucionais</div>
+
+  <div class="inv-grid">
+
+    <div class="inv-card sage">
+      <div class="inv-head"><span class="inv-head-name">Bill Ackman</span><span class="inv-head-style">Pershing Square · Activist Investing</span></div>
+      <div class="inv-body">
+        <p><strong>AUM:</strong> ~US$14bi. Posições públicas: Howard Hughes, Restaurant Brands, Hilton.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p><strong>Pershing Square USA (IPO abr/2026):</strong> Flopped — abriu a US$42 vs. oferta de US$50 (-16%), captou US$5bi (vs. meta de US$10bi+). <strong>Universal Music:</strong> Pershing Square vendeu 80,6mi de ações após proposta de takeover rejeitada pela UMG. Ackman muito ativo no X sobre SpaceX (cotista). <a href="https://www.cnbc.com/2026/04/29/bill-ackmans-5-billion-pershing-square-ipo-to-start-trading-testing-berkshire-style-vision.html" target="_blank" style="color:var(--teal-s)">→ CNBC</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card sage">
+      <div class="inv-head"><span class="inv-head-name">David Tepper</span><span class="inv-head-style">Appaloosa Management · Macro + Distressed</span></div>
+      <div class="inv-body">
+        <p><strong>AUM:</strong> ~US$7bi (31/03/2026). Top 5 posições Q1/2026: AMZN, MU, GOOG, UBER, TSM.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>13F Q1/2026 divulgado em 15/05: Tepper inclinou para <strong>cíclicos e exposição à China</strong> enquanto trimou parcialmente mega-caps tech vencedoras. <strong>Whirlpool (WHR)</strong> adicionado agressivamente — US$432mi (5,85% do portfólio). Vê oportunidade seletiva em ações chinesas de qualidade apesar da deflação. <a href="https://www.gurufocus.com/guru/david+tepper/current-portfolio/portfolio?view=table" target="_blank" style="color:var(--teal-s)">→ GuruFocus</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card dark">
+      <div class="inv-head"><span class="inv-head-name">Chase Coleman</span><span class="inv-head-style">Tiger Global · Growth + VC</span></div>
+      <div class="inv-body">
+        <p><strong>AUM atual:</strong> ~US$22bi (vs. pico US$95bi em 2021 após perdas de 2022).</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Tiger Global em recuperação: portfólio de VC se beneficia do revival de IPOs (SpaceX, OpenAI em preparação). Foco em IA, healthtech e fintech. Performance do hedge fund melhorou em 2025–2026 com retomada de growth stocks. Ainda com US$73bi a menos que o pico — recuperação ainda incompleta.</p>
+      </div>
+    </div>
+
+    <div class="inv-card dark">
+      <div class="inv-head"><span class="inv-head-name">Chris Hohn</span><span class="inv-head-style">TCI Fund · Long-Term Concentrated + ESG</span></div>
+      <div class="inv-body">
+        <p><strong>AUM:</strong> ~US$50bi+. Portfólio: Alphabet, Visa, MSCI, infraestrutura global.</p>
+      </div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Sem nova campanha ativista pública recente. Estratégia de longo prazo concentrada em quality se beneficia do ambiente atual onde qualidade supera momentum de curto prazo. Hohn pressiona empresas em redução de emissões de carbono — ativismo ESG continua ativo internamente.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── INSTITUIÇÕES ────────────────────────────────────── -->
+<div class="section" id="instituicoes">
+  <div class="section-title">🌐 Top Instituições Globais de Investimento</div>
+
+  <div class="inv-grid">
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">BlackRock (~US$10 tri AUM)</span><span class="inv-head-style">ETFs · Multi-asset · Aladdin</span></div>
+      <div class="inv-body"><p>BII Midyear Forum: mega forces (IA, fragmentação global, inflação persistente) redesenhando oportunidades de investimento. Gasto planejado de hyperscalers de IA se aproxima de <strong>US$1 tri/ano até 2028</strong>.</p></div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>BII Q2/2026: <strong>overweight EM</strong>, total portfolio approach (TPA) como novo paradigma. Alerta: bonds longos americanos não estão funcionando como hedge tradicional — retornos negativos desde início do conflito Irã. Ampliou horizonte tático para 6–12 meses e recomenda "Plan B portfolio" explícito. <a href="https://www.blackrock.com/corporate/insights/blackrock-investment-institute/publications/outlook" target="_blank" style="color:var(--teal-s)">→ BlackRock BII</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Goldman Sachs GSAM (~US$2,8 tri AUM)</span><span class="inv-head-style">GIR · Multi-asset · Alternativo</span></div>
+      <div class="inv-body"><p>GIR elevou target do S&P 500 para <strong>8.000</strong> (EPS de US$340, +24% a.a.). IA é o motor de ~50% do crescimento de earnings projetado.</p></div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>GS dobrou a aposta no bull market de IA. Riscos reconhecidos: oil spike, tensões geopolíticas, Fed mais hawkish, compressão de múltiplos. Target de ouro: <strong>US$4.500</strong>. Identifica "nova divergência estrutural" entre setores AI vs. non-AI. <a href="https://finance.yahoo.com/news/goldman-sachs-doubles-down-bold-153300685.html" target="_blank" style="color:var(--teal-s)">→ Yahoo Finance</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">J.P. Morgan AM (~US$3,5 tri AUM)</span><span class="inv-head-style">Guide to Markets · Multi-asset</span></div>
+      <div class="inv-body"><p>JPMorgan revisou target do S&P 500 para <strong>7.200</strong> (vs. 7.500 anterior). Risco de oil spike e desaceleração do consumo são as principais preocupações.</p></div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>"Ambiente de mercado frágil." Inflação dos EUA persistente em H1 → esperado arrefecimento em H2 se acordo iraniano se concretizar. Overweight em quality, neutro em growth puro, underweight small caps americanos. <strong>Private credit</strong> como substituto de bonds. <a href="https://www.thestreet.com/investing/jpmorgan-resets-sp-500-price-target-for-rest-of-2026" target="_blank" style="color:var(--teal-s)">→ TheStreet</a></p>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-head"><span class="inv-head-name">Bridgewater (~US$100bi AUM)</span><span class="inv-head-style">All Weather · Pure Alpha · Macro</span></div>
+      <div class="inv-body"><p>All Weather: 30% ações, 55% bonds, 15% ouro+commodities. Dalio saiu como Co-CIO mas continua como orientador estratégico.</p></div>
+      <div class="inv-news">
+        <div class="inv-news-label">📰 Novidades reais</div>
+        <p>Bridgewater reforçou posição de convicção em ouro. Tese de 15% em ouro "de volta ao centro do trade macro". Reduzindo bonds americanos de longo prazo. Dalio alerta para "guerra de capitais" onde dinheiro é usado como arma geopolítica. <a href="https://hedgeco.net/news/05/2026/bridgewaters-gold-conviction-why-ray-dalios-15-allocation-thesis-is-back-at-the-center-of-the-macro-trade.html" target="_blank" style="color:var(--teal-s)">→ HedgeCo</a></p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── ATIVOS ──────────────────────────────────────────── -->
+<div class="section" id="ativos">
+  <div class="section-title">Análise de Ativos e Setores</div>
+
+  <table>
+    <thead><tr><th>Ativo / Classe</th><th>Valor Atual</th><th>Classificação</th><th>Visão Estratégica</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Ouro (XAU/USD)</strong></td>
+        <td>US$ 4.180</td>
+        <td><span class="badge badge-up">Estrutural</span></td>
+        <td>Tendência de alta de longo prazo intacta. Suporte US$3.900, resistência US$4.500. Dalio 15%, Druckenmiller long. Desdolarização + BCs emergentes comprando = tese estrutural.</td>
+      </tr>
+      <tr>
+        <td><strong>Cobre</strong></td>
+        <td>~US$12.125/t</td>
+        <td><span class="badge badge-up">Estrutural</span></td>
+        <td>Maior déficit de oferta em 22 anos. Demanda de IA (data centers) + eletrificação global. Druckenmiller e BlackRock overweight. Risco: China desacelera mais que o esperado.</td>
+      </tr>
+      <tr>
+        <td><strong>S&P 500</strong></td>
+        <td>7.403</td>
+        <td><span class="badge badge-warn">Cauteloso</span></td>
+        <td>Alta esticada. CAPE 39 · Buffett Indicator 229%. GS target 8.000, JPM target 7.200. Manter com proteção via puts. Evitar perseguir alta após +25% em 12 meses.</td>
+      </tr>
+      <tr>
+        <td><strong>Ibovespa</strong></td>
+        <td>171.133</td>
+        <td><span class="badge badge-up">Valor</span></td>
+        <td>P/L ~9x vs. S&P 24x — melhor prêmio relativo entre emergentes. Catalisador: ciclo de corte da Selic. Alvo 196k (consenso) requer fluxo estrangeiro + melhora fiscal.</td>
+      </tr>
+      <tr>
+        <td><strong>Renda Fixa Brasil</strong></td>
+        <td>Selic 14,5%</td>
+        <td><span class="badge badge-up">Bullish</span></td>
+        <td>Retorno real excepcional. NTN-B 2030–2035 (IPCA+7–8%) captura carrego atual + ganho de capital quando Selic cair. Melhor risco-retorno disponível no Brasil.</td>
+      </tr>
+      <tr>
+        <td><strong>FIIs / REITs</strong></td>
+        <td>IFIX 3.382</td>
+        <td><span class="badge badge-warn">Construtivo</span></td>
+        <td>FIIs de papel (CRI IPCA+) com DY 9–12%. FIIs de tijolo se valorizam mais quando Selic cair em 2027. REITs EUA ainda pressionados pelo juro a 4,47%.</td>
+      </tr>
+      <tr>
+        <td><strong>Petróleo (WTI)</strong></td>
+        <td>US$ 90/bbl</td>
+        <td><span class="badge badge-down">Evitar</span></td>
+        <td>Totalmente dependente de geopolítica Irã. Sem convicção direcional. Cenário base: queda para US$75 com acordo. Risco: spike para US$110+ sem acordo.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── POSICIONAMENTO ──────────────────────────────────── -->
+<div class="section" id="posicionamento">
+  <div class="section-title">Posicionamento Tático — Junho 2026</div>
+  <table class="pos-table">
+    <thead><tr><th>Classe / Ativo</th><th>Visão</th><th>Ação Sugerida</th><th>Horizonte</th></tr></thead>
+    <tbody>
+      <tr><td>Renda Fixa Brasil (CDI/Selic)</td><td class="pos-bull">BULLISH</td><td>Manter carrego alto</td><td>Curto prazo</td></tr>
+      <tr><td>NTN-B 2030–2035 (IPCA+)</td><td class="pos-bull">BULLISH</td><td>Aumentar gradualmente</td><td>Médio/longo</td></tr>
+      <tr><td>Ouro (XAU/USD)</td><td class="pos-bull">BULLISH estrutural</td><td>Manter 5–10% portfólio</td><td>Longo prazo</td></tr>
+      <tr><td>Cobre / Metais industriais</td><td class="pos-bull">BULLISH estrutural</td><td>Entrada em correções</td><td>Longo prazo</td></tr>
+      <tr><td>Ibovespa (seletivo)</td><td class="pos-neu">CONSTRUTIVO</td><td>Foco em valor + dividendos</td><td>Médio prazo</td></tr>
+      <tr><td>FIIs logística / CRI IPCA+</td><td class="pos-neu">CONSTRUTIVO</td><td>Acumular com DY &gt; 9%</td><td>Médio prazo</td></tr>
+      <tr><td>S&P 500 (EUA)</td><td class="pos-neu">NEUTRO / CAUTELOSO</td><td>Manter + adicionar puts</td><td>Tático</td></tr>
+      <tr><td>Nasdaq / Growth AI</td><td class="pos-bear">CAUTELOSO</td><td>Reduzir concentração</td><td>Tático</td></tr>
+      <tr><td>Japão / Coreia (via ETF)</td><td class="pos-bull">CONSTRUTIVO</td><td>Druckenmiller long — avaliar</td><td>Médio prazo</td></tr>
+      <tr><td>Petróleo</td><td class="pos-bear">VOLÁTIL</td><td>Evitar exposição direcional</td><td>Tático</td></tr>
+      <tr><td>Dólar (USD/BRL)</td><td class="pos-neu">NEUTRO</td><td>Hedge cambial parcial</td><td>Tático</td></tr>
+      <tr><td>Caixa estratégico</td><td class="pos-bull">BULLISH</td><td>Manter 10–15% em liquidez</td><td>Contínuo</td></tr>
+    </tbody>
+  </table>
+  <div class="alert alert-info" style="margin-top:14px">
+    <strong>Princípio de navegação — jun/2026:</strong> Mercados EUA caros, mas fluxo e narrativa sustentam. Brasil oferece valor relativo com catalisador claro (corte da Selic). Ouro e cobre têm melhor assimetria estrutural. Geopolítica do Irã é o wildcard — mantenha liquidez para aproveitar eventual selloff. Buffett e Klarman com caixa alto enviam o sinal mais claro: <strong>não é hora de estar all-in.</strong>
+  </div>
+</div>
+
+<!-- ── GRÁFICOS ────────────────────────────────────────── -->
+<div class="section" id="graficos">
+  <div class="section-title">Painel de Gráficos — 10 Indicadores Obrigatórios</div>
+  <p style="font-size:12px;color:var(--gray);margin-bottom:16px">Série histórica de referência (30 períodos). Último valor = fechamento de 13/06/2026.</p>
+
+  <div class="chart-grid">
+    <div class="chart-box"><div class="chart-label">Ibovespa (B3)</div><canvas id="c1"></canvas></div>
+    <div class="chart-box"><div class="chart-label">IFIX (FIIs)</div><canvas id="c2"></canvas></div>
+    <div class="chart-box"><div class="chart-label">USD / BRL</div><canvas id="c3"></canvas></div>
+    <div class="chart-box"><div class="chart-label">Selic % a.a.</div><canvas id="c4"></canvas></div>
+    <div class="chart-box"><div class="chart-label">S&P 500</div><canvas id="c5"></canvas></div>
+    <div class="chart-box"><div class="chart-label">Nasdaq 100</div><canvas id="c6"></canvas></div>
+    <div class="chart-box"><div class="chart-label">DXY (Dólar Index)</div><canvas id="c7"></canvas></div>
+    <div class="chart-box"><div class="chart-label">Treasury 10Y (Yield %)</div><canvas id="c8"></canvas></div>
+    <div class="chart-box"><div class="chart-label">Shiller CAPE</div><canvas id="c9"></canvas></div>
+    <div class="chart-box"><div class="chart-label">Ouro (USD/oz)</div><canvas id="c10"></canvas></div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<div class="footer">
+  <strong>DISCLAIMER:</strong> Este relatório é produzido exclusivamente para fins educacionais e informativos. Não constitui oferta, recomendação ou solicitação de compra ou venda de qualquer ativo financeiro. Investimentos envolvem riscos, incluindo a perda do capital investido.<br>
+  Fontes: CNBC · Bloomberg · SEC EDGAR · GuruFocus · Oaktree Capital · HedgeCo · Yahoo Finance · Agência Brasil · Banco Central do Brasil · Federal Reserve<br><br>
+  <strong>Steady Edge Wealth Journey</strong> · <a href="mailto:netoantoniomarquess@gmail.com">netoantoniomarquess@gmail.com</a> · Gerado em 16/06/2026<br>
+  Repositório: <a href="https://github.com/netoantoniomarquess/Worldwide-Investing-" target="_blank">github.com/netoantoniomarquess/Worldwide-Investing-</a>
+</div>
+
+<script>
+// ── CHART.JS — 10 gráficos ────────────────────────────────────
+const TEAL = '#1F4E5F', SAGE = '#7FA287', GOLD = '#C7A96B', RED = '#C0392B', GRAY = '#D9DEE3';
+
+function sparkLine(id, labels, data, color, fill) {
+  const ctx = document.getElementById(id).getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: color,
+        backgroundColor: color + '22',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { display: true, ticks: { maxTicksLimit: 6, font: { size: 9 }, color: '#5B6670' }, grid: { display: false } },
+        y: { display: true, ticks: { font: { size: 9 }, color: '#5B6670' }, grid: { color: '#D9DEE300', borderColor: '#D9DEE3' } }
+      }
+    }
+  });
+}
+
+// Dados simulados (série histórica de 30 períodos)
+const W = ['S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12','S13','S14','S15',
+           'S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30'];
+
+function jitter(arr, noise) {
+  return arr.map((v, i) => v + (Math.sin(i * 2.3) * noise + Math.cos(i * 1.7) * noise * 0.5));
+}
+
+function linspace(a, b, n) {
+  return Array.from({length: n}, (_, i) => a + (b - a) * i / (n - 1));
+}
+
+sparkLine('c1',  W, jitter(linspace(127000,171133,30),2500), TEAL);
+sparkLine('c2',  W, jitter(linspace(3120,3382,30),18), SAGE);
+sparkLine('c3',  W, jitter(linspace(5.85,5.07,30),0.06), GOLD);
+sparkLine('c4',  ['Jan','Fev','Mar','Abr','Mai','Jun'],
+                 [13.25,13.75,14.25,14.75,15.00,14.50], RED);
+sparkLine('c5',  W, jitter(linspace(5900,7403,30),90), TEAL);
+sparkLine('c6',  W, jitter(linspace(19800,25717,30),300), TEAL);
+sparkLine('c7',  W, jitter(linspace(108,100.09,30),0.8), GOLD);
+sparkLine('c8',  W, jitter(linspace(4.85,4.47,30),0.06), RED);
+sparkLine('c9',  W, jitter(linspace(34,39.27,30),0.4), RED);
+sparkLine('c10', W, jitter(linspace(2200,4180,30),60), GOLD);
+</script>
+</body>
+</html>
